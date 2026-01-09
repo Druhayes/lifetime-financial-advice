@@ -49,3 +49,9 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --cov=lifecycle --cov-report=term-missing"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.1.0",
+    "ipython>=9.9.0",
+]
