@@ -32,16 +32,16 @@ import numpy as np
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from lifecycle.annuities import mortality_credit, spia_price
-from lifecycle.balance_sheet import (
+from lifecycle_planning.core.annuities import mortality_credit, spia_price
+from lifecycle_planning.core.balance_sheet import (
     compare_scenarios,
     create_isabela,
 )
-from lifecycle.mortality import (
+from lifecycle_planning.core.mortality import (
     life_expectancy,
     survival_probability_series,
 )
-from lifecycle.portfolio import mvo_optimal_portfolio
+from lifecycle_planning.core.portfolio import mvo_optimal_portfolio
 
 
 def print_section(title: str):

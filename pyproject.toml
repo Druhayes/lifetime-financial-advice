@@ -1,22 +1,96 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
-name = "lifetime-financial-advice"
+name = "lifecycle-planning"
 version = "0.1.0"
-description = "Lifecycle financial planning library based on lifetime financial advice"
+description = "Lifecycle financial planning library based on human capital and asset allocation theory"
 readme = "README.md"
 requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Drew Hayes"},
+]
+keywords = [
+    "finance",
+    "financial-planning",
+    "lifecycle",
+    "human-capital",
+    "retirement",
+    "portfolio-optimization",
+    "asset-allocation",
+    "mortality",
+    "gompertz",
+    "actuarial",
+    "wealth-management",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed",
+]
+
 dependencies = [
     "numpy>=1.24.0",
-    "scipy>=1.16.3",
+    "scipy>=1.10.0",
 ]
 
 [project.optional-dependencies]
+cli = [
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "pyyaml>=6.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-copybutton>=0.5.0",
+    "sphinx-autobuild>=2021.3.14",
+]
 dev = [
     "mypy>=1.8.0",
     "pytest>=8.0.0",
     "pytest-cov>=4.1.0",
     "black>=24.0.0",
     "ruff>=0.1.0",
+    "ipykernel>=7.1.0",
+    "ipython>=9.9.0",
 ]
+all = [
+    "lifecycle-planning[cli,docs,dev]",
+]
+
+[project.urls]
+Homepage = "https://github.com/Druhayes/lifetime-financial-advice"
+Documentation = "https://lifecycle-planning.readthedocs.io"
+Repository = "https://github.com/Druhayes/lifetime-financial-advice"
+"Bug Tracker" = "https://github.com/Druhayes/lifetime-financial-advice/issues"
+
+[project.scripts]
+lifecycle = "lifecycle_planning.cli.commands:cli"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/examples",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+    "/CHANGELOG.md",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lifecycle_planning"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -38,20 +112,15 @@ target-version = ["py311"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+select = ["E", "F", "I", "N", "UP", "PL"]
 
 [tool.basedpyright]
 typeCheckingMode = "off"
-pythonVersion = 3.12
+pythonVersion = "3.11"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=lifecycle --cov-report=term-missing"
-
-[dependency-groups]
-dev = [
-    "ipykernel>=7.1.0",
-    "ipython>=9.9.0",
-]
+addopts = "-v --cov=lifecycle_planning --cov-report=term-missing --cov-report=html"

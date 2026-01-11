@@ -5,18 +5,37 @@ A Python implementation of lifecycle financial planning models based on
 "Lifetime Financial Advice: Human Capital, Asset Allocation, and Insurance"
 by Ibbotson, Milevsky, Chen, and Zhu.
 
-Modules:
-    mortality: Gompertz survival probability calculations
-    utility: CRRA and Levy-Markowitz utility functions
-    present_value: Present value and human capital calculations
-    income: Wage curves and income modeling
-    spending: Optimal spending and consumption rules
-    portfolio: Mean-variance optimization and asset allocation
-    annuities: SPIA pricing and mortality credits
-    balance_sheet: Individual economic balance sheet
+This library provides tools for:
+- Mortality modeling using Gompertz survival probabilities
+- CRRA utility and preference modeling
+- Human capital and liability calculations
+- Optimal spending rules for retirement planning
+- Mean-variance portfolio optimization
+- Annuity pricing and analysis
+- Individual economic balance sheets for comprehensive financial planning
+
+Example:
+    >>> from lifecycle_planning import IndividualBalanceSheet, FinancialPreferences
+    >>>
+    >>> prefs = FinancialPreferences(theta=0.35, rho=0.02, eta=0.50)
+    >>> client = IndividualBalanceSheet(
+    ...     current_age=30,
+    ...     retirement_age=65,
+    ...     gender="female",
+    ...     current_income=85000,
+    ...     nondiscretionary_spending=50000,
+    ...     taxable_wealth=25000,
+    ...     tax_advantaged_wealth=150000,
+    ...     preferences=prefs,
+    ... )
+    >>> print(f"Net Worth: ${client.net_worth:,.0f}")
 """
 
-from lifecycle.mortality import (
+from lifecycle_planning._version import __version__
+
+# Import from core modules
+from lifecycle_planning.core import (
+    # mortality
     gompertz_survival_prob,
     truncated_gompertz,
     survival_probability,
@@ -24,16 +43,12 @@ from lifecycle.mortality import (
     death_probability,
     life_expectancy,
     GOMPERTZ_PARAMS,
-)
-
-from lifecycle.utility import (
+    # utility
     crra_utility,
     marginal_utility,
     levy_markowitz_utility,
     risk_adjusted_expected_return,
-)
-
-from lifecycle.present_value import (
+    # present_value
     present_value,
     present_value_growing,
     human_capital,
@@ -41,48 +56,38 @@ from lifecycle.present_value import (
     liability_value,
     liability_value_mortality_weighted,
     net_worth,
-)
-
-from lifecycle.income import (
+    # income
     income_curve,
     income_multiplier,
     projected_income,
     risky_income,
     WAGE_CURVES,
-)
-
-from lifecycle.spending import (
+    # spending
     consumption_growth_rate,
     optimal_consumption_divisor,
     discretionary_consumption,
     rescheduling_factor,
     spending_rule_no_annuities,
     spending_rule_with_annuities,
-)
-
-from lifecycle.portfolio import (
+    # portfolio
     portfolio_expected_return,
     portfolio_variance,
     portfolio_std,
     mvo_optimal_portfolio,
     theta_to_lambda,
     certainty_equivalent_return,
-)
-
-from lifecycle.annuities import (
+    # annuities
     spia_price,
     mortality_credit,
     iva_units,
     annuity_adjusted_survival,
-)
-
-from lifecycle.balance_sheet import (
+    # balance_sheet
     IndividualBalanceSheet,
     FinancialPreferences,
 )
 
-__version__ = "0.1.0"
 __all__ = [
+    "__version__",
     # mortality
     "gompertz_survival_prob",
     "truncated_gompertz",

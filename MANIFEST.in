@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+recursive-include examples *.py
+recursive-include src/lifecycle_planning *.py
+prune tests
+prune docs/_build
+prune **/__pycache__
+global-exclude *.pyc

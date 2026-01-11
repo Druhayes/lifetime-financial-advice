@@ -21,25 +21,25 @@ import numpy as np
 from dataclasses import dataclass, field
 from typing import Optional, Dict, List
 
-from lifecycle.mortality import (
+from .mortality import (
     survival_probability_series,
     death_probability_series,
     personalized_mode,
     GOMPERTZ_PARAMS,
 )
-from lifecycle.present_value import (
+from .present_value import (
     human_capital_mortality_weighted,
     liability_value_mortality_weighted,
     income_discount_rate,
     liability_discount_rate,
 )
-from lifecycle.income import projected_income, full_income_stream
-from lifecycle.spending import (
+from .income import projected_income, full_income_stream
+from .spending import (
     consumption_growth_rate,
     optimal_consumption_divisor_with_annuities,
     discretionary_consumption,
 )
-from lifecycle.utility import PreferenceParams
+from .utility import PreferenceParams
 
 
 @dataclass

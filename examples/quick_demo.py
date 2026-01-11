@@ -30,7 +30,7 @@ def demo():
     print("=" * 70)
 
     # Import library modules
-    from lifecycle import (
+    from lifecycle_planning import (
         # Mortality
         survival_probability,
         life_expectancy,
@@ -58,7 +58,7 @@ def demo():
         IndividualBalanceSheet,
         FinancialPreferences,
     )
-    from lifecycle.mortality import survival_probability_series
+    from lifecycle_planning.core.mortality import survival_probability_series
 
     # -------------------------------------------------------------------------
     # 1. Mortality Functions
