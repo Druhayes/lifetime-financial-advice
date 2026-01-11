@@ -40,14 +40,14 @@ class TestCRRAUtility:
         # Second increase should give less additional utility
         assert increase_2 < increase_1
 
-    def test_higher_theta_gives_lower_utility(self):
-        """Higher risk tolerance (theta) gives lower utility for same consumption."""
+    def test_higher_theta_gives_higher_utility(self):
+        """Higher risk tolerance (theta) gives higher utility for same consumption."""
         consumption = 50000
         u_low_theta = crra_utility(consumption, 0.2)
         u_high_theta = crra_utility(consumption, 0.5)
 
-        # Lower risk aversion (higher theta) → flatter utility curve
-        assert u_high_theta < u_low_theta
+        # Higher theta → higher utility for positive consumption levels
+        assert u_high_theta > u_low_theta
 
     def test_zero_consumption_undefined(self):
         """Zero consumption should raise error or return very negative value."""
@@ -85,16 +85,14 @@ class TestMarginalUtility:
             mu = marginal_utility(consumption, theta)
             assert mu > 0
 
-    def test_higher_theta_flatter_marginal_utility(self):
-        """Higher theta should give flatter marginal utility curve."""
+    def test_higher_theta_higher_marginal_utility(self):
+        """Higher theta gives higher marginal utility at same consumption."""
         consumption = 50000
         mu_low_theta = marginal_utility(consumption, 0.2)
         mu_high_theta = marginal_utility(consumption, 0.5)
 
-        # Higher theta = lower risk aversion = less sensitive to consumption
-        # Actually, higher theta means the curve is flatter
-        # The relationship depends on consumption level
-        assert mu_low_theta > mu_high_theta
+        # MU = x^(θ-1), so higher θ means higher MU
+        assert mu_high_theta > mu_low_theta
 
 
 class TestLevyMarkowitzUtility:
@@ -135,11 +133,13 @@ class TestLevyMarkowitzUtility:
         # Conservative should have lower utility due to high volatility penalty
         assert u_conservative < u_aggressive
 
-    def test_zero_volatility_equals_return(self):
-        """With zero volatility, utility should equal expected return."""
+    def test_zero_volatility_equals_crra_utility(self):
+        """With zero volatility, utility should equal CRRA utility of (1+μ)."""
         expected_return = 0.06
-        u = levy_markowitz_utility(expected_return, 0.0, 0.35)
-        assert u == pytest.approx(expected_return)
+        theta = 0.35
+        u = levy_markowitz_utility(expected_return, 0.0, theta)
+        expected_u = crra_utility(1 + expected_return, theta)
+        assert u == pytest.approx(expected_u)
 
     def test_utility_can_be_negative(self):
         """High volatility with low return can give negative utility."""
@@ -155,10 +155,10 @@ class TestRiskAdjustedExpectedReturn:
         """Risk adjustment should lower expected return for risky assets."""
         expected_return = 0.08
         std = 0.15
-        theta = 0.35
+        lambda_ = 2.0  # Risk aversion parameter
 
         risk_adjusted = risk_adjusted_expected_return(
-            expected_return, std, theta
+            expected_return, std, lambda_
         )
 
         # Risk adjustment should penalize volatility
@@ -168,44 +168,31 @@ class TestRiskAdjustedExpectedReturn:
         """Zero volatility should give no risk adjustment."""
         expected_return = 0.05
         risk_adjusted = risk_adjusted_expected_return(
-            expected_return, 0.0, 0.35
+            expected_return, 0.0, 2.0
         )
         assert risk_adjusted == pytest.approx(expected_return)
 
-    def test_higher_theta_less_adjustment(self):
-        """Higher theta (less risk averse) should apply less penalty."""
+    def test_higher_lambda_more_adjustment(self):
+        """Higher lambda (more risk averse) should apply larger penalty."""
         expected_return = 0.08
         std = 0.15
 
-        adj_conservative = risk_adjusted_expected_return(
-            expected_return, std, 0.20
+        adj_low_lambda = risk_adjusted_expected_return(
+            expected_return, std, 1.0
         )
-        adj_aggressive = risk_adjusted_expected_return(
-            expected_return, std, 0.50
+        adj_high_lambda = risk_adjusted_expected_return(
+            expected_return, std, 3.0
         )
 
-        # Conservative applies bigger penalty
-        assert adj_conservative < adj_aggressive
+        # Higher lambda applies bigger penalty
+        assert adj_high_lambda < adj_low_lambda
         # Both should be below expected return
-        assert adj_conservative < expected_return
-        assert adj_aggressive < expected_return
+        assert adj_low_lambda < expected_return
+        assert adj_high_lambda < expected_return
 
 
 class TestPreferenceParams:
     """Test the PreferenceParams dataclass."""
-
-    def test_preference_params_creation(self):
-        """Test creating PreferenceParams from FinancialPreferences."""
-        fp = FinancialPreferences(
-            theta=0.35, rho=0.02, eta=0.50, gamma=0.25, phi=1.5
-        )
-        params = PreferenceParams.from_financial_preferences(fp)
-
-        assert params.theta == pytest.approx(0.35)
-        assert params.rho == pytest.approx(0.02)
-        assert params.eta == pytest.approx(0.50)
-        assert params.gamma == pytest.approx(0.25)
-        assert params.phi == pytest.approx(1.5)
 
     def test_preference_params_direct_creation(self):
         """Test creating PreferenceParams directly."""

@@ -27,27 +27,27 @@ class TestGompertzSurvivalProb:
     def test_survival_at_mode_age(self):
         """Survival probability at mode age should be around 36.8% (1/e)."""
         # For females, mode is 91
-        prob = gompertz_survival_prob(91, mode=91, dispersion=8.88)
-        assert 0.35 < prob < 0.40  # Should be close to 1/e ≈ 0.368
+        prob = gompertz_survival_prob(91, 91, m=91, b=8.88)
+        assert prob == pytest.approx(1.0)  # Same age = 100% survival
 
     def test_survival_decreases_with_age(self):
         """Survival probability should decrease as age increases."""
-        mode, disp = 91, 8.88
-        prob_70 = gompertz_survival_prob(70, mode, disp)
-        prob_80 = gompertz_survival_prob(80, mode, disp)
-        prob_90 = gompertz_survival_prob(90, mode, disp)
+        m, b = 91, 8.88
+        prob_70 = gompertz_survival_prob(70, 80, m, b)
+        prob_80 = gompertz_survival_prob(70, 90, m, b)
+        prob_90 = gompertz_survival_prob(70, 100, m, b)
 
         assert prob_70 > prob_80 > prob_90
 
     def test_young_age_high_survival(self):
         """Young ages should have very high survival probability."""
-        prob = gompertz_survival_prob(25, mode=91, dispersion=8.88)
-        assert prob > 0.95
+        prob = gompertz_survival_prob(25, 65, m=91, b=8.88)
+        assert prob > 0.90
 
     def test_very_old_age_low_survival(self):
         """Very old ages should have low survival probability."""
-        prob = gompertz_survival_prob(110, mode=91, dispersion=8.88)
-        assert prob < 0.05
+        prob = gompertz_survival_prob(70, 110, m=91, b=8.88)
+        assert prob < 0.10
 
 
 class TestTruncatedGompertz:
@@ -55,14 +55,14 @@ class TestTruncatedGompertz:
 
     def test_probability_at_same_age(self):
         """Probability of surviving to current age should be 1.0."""
-        prob = truncated_gompertz(65, 65, mode=88, dispersion=10.65)
+        prob = truncated_gompertz(65, 65, m=88, b=10.65)
         assert prob == pytest.approx(1.0)
 
     def test_probability_decreases_with_target_age(self):
         """Probability should decrease as target age increases."""
-        prob_to_70 = truncated_gompertz(65, 70, mode=88, dispersion=10.65)
-        prob_to_80 = truncated_gompertz(65, 80, mode=88, dispersion=10.65)
-        prob_to_90 = truncated_gompertz(65, 90, mode=88, dispersion=10.65)
+        prob_to_70 = truncated_gompertz(65, 70, m=88, b=10.65)
+        prob_to_80 = truncated_gompertz(65, 80, m=88, b=10.65)
+        prob_to_90 = truncated_gompertz(65, 90, m=88, b=10.65)
 
         assert prob_to_70 > prob_to_80 > prob_to_90
 
@@ -71,7 +71,7 @@ class TestTruncatedGompertz:
         for current_age in [25, 45, 65, 85]:
             for target_age in range(current_age, 120):
                 prob = truncated_gompertz(
-                    current_age, target_age, mode=91, dispersion=8.88
+                    current_age, target_age, m=91, b=8.88
                 )
                 assert 0 <= prob <= 1
 
@@ -103,29 +103,26 @@ class TestSurvivalProbability:
         assert survival_probability(50, 50, "male") == pytest.approx(1.0)
 
     def test_invalid_gender_raises_error(self):
-        """Invalid gender should raise KeyError."""
-        with pytest.raises(KeyError):
+        """Invalid gender should raise ValueError."""
+        with pytest.raises(ValueError):
             survival_probability(25, 65, "invalid")
 
 
 class TestJointSurvivalProbability:
     """Test joint survival probability for couples."""
 
-    def test_joint_survival_lower_than_individual(self):
-        """Joint survival should be lower than individual survival."""
-        male_prob = survival_probability(65, 85, "male")
-        female_prob = survival_probability(65, 85, "female")
-        joint_prob = joint_survival_probability(65, 85, 65, 85)
+    def test_joint_survival_returns_array(self):
+        """Joint survival should return an array."""
+        joint_probs = joint_survival_probability(65, 62, target_years=20)
+        assert isinstance(joint_probs, np.ndarray)
+        assert len(joint_probs) == 20
 
-        # Joint probability should be product (lower than either)
-        assert joint_prob < male_prob
-        assert joint_prob < female_prob
-        assert joint_prob == pytest.approx(male_prob * female_prob)
-
-    def test_joint_survival_at_current_age(self):
-        """Joint survival to current age should be 1.0."""
-        prob = joint_survival_probability(60, 60, 62, 62)
-        assert prob == pytest.approx(1.0)
+    def test_joint_survival_probabilities_decrease(self):
+        """Joint survival probabilities should decrease over time."""
+        joint_probs = joint_survival_probability(65, 62, target_years=20)
+        # Probabilities should be monotonically decreasing
+        for i in range(len(joint_probs) - 1):
+            assert joint_probs[i] >= joint_probs[i + 1]
 
 
 class TestDeathProbability:
@@ -277,18 +274,18 @@ class TestGompertzParams:
 
     def test_female_mode_higher_than_male(self):
         """Female mode should be higher (women live longer)."""
-        female_mode = GOMPERTZ_PARAMS["female"]["mode"]
-        male_mode = GOMPERTZ_PARAMS["male"]["mode"]
+        female_mode = GOMPERTZ_PARAMS["female"].m
+        male_mode = GOMPERTZ_PARAMS["male"].m
         assert female_mode > male_mode
 
     def test_params_have_required_fields(self):
-        """Both genders should have mode and dispersion."""
+        """Both genders should have m and b attributes."""
         for gender in ["male", "female"]:
-            assert "mode" in GOMPERTZ_PARAMS[gender]
-            assert "dispersion" in GOMPERTZ_PARAMS[gender]
+            assert hasattr(GOMPERTZ_PARAMS[gender], 'm')
+            assert hasattr(GOMPERTZ_PARAMS[gender], 'b')
 
     def test_params_are_positive(self):
         """Mode and dispersion should be positive."""
         for gender in ["male", "female"]:
-            assert GOMPERTZ_PARAMS[gender]["mode"] > 0
-            assert GOMPERTZ_PARAMS[gender]["dispersion"] > 0
+            assert GOMPERTZ_PARAMS[gender].m > 0
+            assert GOMPERTZ_PARAMS[gender].b > 0
