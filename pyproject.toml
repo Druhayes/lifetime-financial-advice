@@ -41,7 +41,9 @@ classifiers = [
 ]
 
 dependencies = [
+    "matplotlib>=3.10.8",
     "numpy>=1.24.0",
+    "pandas>=3.0.0",
     "scipy>=1.10.0",
 ]
 
@@ -124,3 +126,8 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --cov=lifecycle_planning --cov-report=term-missing --cov-report=html"
+
+[dependency-groups]
+dev = [
+    "notebook>=7.5.2",
+]

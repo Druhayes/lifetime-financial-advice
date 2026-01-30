@@ -2,6 +2,12 @@
 Tests for lifecycle_planning.core.balance_sheet module.
 
 Tests IndividualBalanceSheet and FinancialPreferences classes.
+
+Verifies implementation against:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    Chapter 4 (Pages 80-81): Balance sheet framework
+    Chapter 12 (Pages 224-237): Isabela example
 """
 
 import pytest

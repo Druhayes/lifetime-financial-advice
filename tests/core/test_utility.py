@@ -3,6 +3,14 @@ Tests for lifecycle_planning.core.utility module.
 
 Tests CRRA utility functions, Levy-Markowitz utility, and
 preference parameter handling.
+
+Verifies implementation against:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    Chapter 8, Page 153
+    - Equation 8.1: Levy-Markowitz utility approximation
+    - Equation 8.2: CRRA utility function
+    - Equation 8.3: Second derivative of CRRA
 """
 
 import pytest
@@ -18,7 +26,11 @@ from lifecycle_planning import FinancialPreferences
 
 
 class TestCRRAUtility:
-    """Test the CRRA (Constant Relative Risk Aversion) utility function."""
+    """Test the CRRA (Constant Relative Risk Aversion) utility function.
+
+    Verifies implementation of Equation 8.2, Page 153:
+    u(x) = ln(x) if θ = 1, else (x^θ - 1)/θ
+    """
 
     def test_utility_increases_with_consumption(self):
         """Utility should increase as consumption increases."""

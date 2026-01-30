@@ -6,12 +6,24 @@ Implements optimal spending rules for lifecycle financial planning:
     - Stochastic spending rules (with market risk)
     - With and without annuities
 
-Based on Chapters 5 and 6 of "Lifetime Financial Advice".
+Implements methodology from:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    CFA Institute Research Foundation
+
+    Source: lifetime-financial-advice.pdf (MCP Knowledge Database)
+    Primary reference: Chapters 5-6, Pages 98-132
 
 Key concepts:
     - Discretionary consumption = Net worth / Divisor
-    - Divisor depends on preferences and survival probabilities
-    - Annuities affect mortality weighting of calculations
+    - Consumption growth rate: g = (r - ρ)/(1 - η) (Page 98)
+    - Divisor depends on preferences and survival probabilities (Equations 6.33-6.34, Pages 131-132)
+    - Certainty equivalent return methodology (Page 122)
+
+References:
+    - Chapter 5: Deterministic life-cycle models (Pages 98-109)
+    - Chapter 6: Stochastic life-cycle models (Pages 110-132)
+    - Equations 6.33-6.34: Consumption divisor formulas (Pages 131-132)
 
 References:
     - Waring, M.B. & Siegel, L.B. (2015). The Only Spending Rule You'll Ever Need.

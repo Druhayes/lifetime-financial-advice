@@ -1,6 +1,6 @@
 # Lifecycle Planning
 
-A comprehensive Python library for lifecycle financial planning based on "Lifetime Financial Advice: Human Capital, Asset Allocation, and Insurance" by Ibbotson, Milevsky, Chen, and Zhu.
+A comprehensive Python library for lifecycle financial planning based on "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach" by Thomas M. Idzorek, CFA and Paul D. Kaplan, CFA (CFA Institute Research Foundation, 2024).
 
 **PyPI Package**: `lifecycle-planning` | **Import**: `lifecycle_planning`
 
@@ -410,13 +410,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## References
 
 **Primary Source:**
+Idzorek, T.M., & Kaplan, P.D. (2024). *Lifetime Financial Advice: A Personalized Optimal Multilevel Approach*. CFA Institute Research Foundation. With a Foreword by Roger G. Ibbotson.
+
+**Note:** This book builds upon and supersedes the earlier work:
 Ibbotson, R. G., Milevsky, M. A., Chen, P., & Zhu, K. X. (2007). *Lifetime Financial Advice: Human Capital, Asset Allocation, and Insurance*. The Research Foundation of CFA Institute.
-[Download PDF](https://rpc.cfainstitute.org/sites/default/files/-/media/documents/article/rf-brief/lifetime-financial-advice.pdf)
+
+The 2024 version by Idzorek and Kaplan provides a "personalized optimal multilevel approach" with a three-stage model: parent life-cycle optimization, child net-worth asset allocation, and grandchild alpha-tracking error optimization.
 
 **Related Works:**
 - Milevsky, M. A. (2020). *Retirement Income Recipes in R*
 - Milevsky, M. A. (2012). *The 7 Most Important Equations for Your Retirement*
 - Merton, R. C. (1969). "Lifetime Portfolio Selection under Uncertainty"
+- Levy, H. & Markowitz, H.M. (1979). "Approximating Expected Utility by a Function of Mean and Variance"
 
 ## Citation
 

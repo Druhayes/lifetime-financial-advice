@@ -16,73 +16,91 @@ Modules:
     balance_sheet: Individual economic balance sheet
 """
 
-from .mortality import (
-    gompertz_survival_prob,
-    truncated_gompertz,
-    survival_probability,
-    joint_survival_probability,
-    death_probability,
-    life_expectancy,
-    GOMPERTZ_PARAMS,
-)
-
-from .utility import (
-    crra_utility,
-    marginal_utility,
-    levy_markowitz_utility,
-    risk_adjusted_expected_return,
-)
-
-from .present_value import (
+# Import modules for use as `from lifecycle_planning.core import present_value`
+from . import (
+    annuities,
+    balance_sheet,
+    income,
+    mortality,
+    portfolio,
     present_value,
-    present_value_growing,
-    human_capital,
-    human_capital_mortality_weighted,
-    liability_value,
-    liability_value_mortality_weighted,
-    net_worth,
+    spending,
+    utility,
 )
 
+# Also import individual functions for convenience
+from .annuities import (
+    annuity_adjusted_survival,
+    iva_units,
+    mortality_credit,
+    spia_price,
+)
+from .balance_sheet import (
+    FinancialPreferences,
+    IndividualBalanceSheet,
+)
 from .income import (
+    WAGE_CURVES,
     income_curve,
     income_multiplier,
     projected_income,
     risky_income,
-    WAGE_CURVES,
 )
-
+from .mortality import (
+    GOMPERTZ_PARAMS,
+    death_probability,
+    gompertz_survival_prob,
+    joint_survival_probability,
+    life_expectancy,
+    survival_probability,
+    truncated_gompertz,
+)
+from .portfolio import (
+    certainty_equivalent_return,
+    mvo_optimal_portfolio,
+    portfolio_expected_return,
+    portfolio_std,
+    portfolio_variance,
+    theta_to_lambda,
+)
+from .present_value import (
+    align_income_survival,
+    human_capital,
+    human_capital_mortality_weighted,
+    income_discount_rate,
+    liability_discount_rate,
+    liability_value,
+    liability_value_mortality_weighted,
+    net_worth,
+    pv,
+    present_value_growing,
+)
 from .spending import (
     consumption_growth_rate,
-    optimal_consumption_divisor,
     discretionary_consumption,
+    optimal_consumption_divisor,
     rescheduling_factor,
     spending_rule_no_annuities,
     spending_rule_with_annuities,
 )
-
-from .portfolio import (
-    portfolio_expected_return,
-    portfolio_variance,
-    portfolio_std,
-    mvo_optimal_portfolio,
-    theta_to_lambda,
-    certainty_equivalent_return,
-)
-
-from .annuities import (
-    spia_price,
-    mortality_credit,
-    iva_units,
-    annuity_adjusted_survival,
-)
-
-from .balance_sheet import (
-    IndividualBalanceSheet,
-    FinancialPreferences,
+from .utility import (
+    crra_utility,
+    levy_markowitz_utility,
+    marginal_utility,
+    risk_adjusted_expected_return,
 )
 
 __version__ = "0.1.0"
 __all__ = [
+    # modules (for imports like: from core import present_value)
+    "annuities",
+    "balance_sheet",
+    "income",
+    "mortality",
+    "portfolio",
+    "present_value",
+    "spending",
+    "utility",
     # mortality
     "gompertz_survival_prob",
     "truncated_gompertz",
@@ -96,11 +114,14 @@ __all__ = [
     "marginal_utility",
     "levy_markowitz_utility",
     "risk_adjusted_expected_return",
-    # present_value
-    "present_value",
+    # present_value (functions)
+    "pv",
     "present_value_growing",
+    "align_income_survival",
     "human_capital",
     "human_capital_mortality_weighted",
+    "income_discount_rate",
+    "liability_discount_rate",
     "liability_value",
     "liability_value_mortality_weighted",
     "net_worth",
