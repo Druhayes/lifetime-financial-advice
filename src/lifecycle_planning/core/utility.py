@@ -4,17 +4,26 @@ Utility Functions for Lifecycle Financial Planning
 Implements CRRA (Constant Relative Risk Aversion) utility functions
 and the Levy-Markowitz approximation for mean-variance optimization.
 
-Based on Chapter 3 and Chapter 8 of "Lifetime Financial Advice".
+Implements methodology from:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    CFA Institute Research Foundation
+    With a Foreword by Roger G. Ibbotson
+
+    Source: lifetime-financial-advice.pdf (MCP Knowledge Database)
+    Primary reference: Chapter 8, Page 153
 
 Key concepts:
-    - CRRA utility: u(x) = ln(x) when θ=1, else (x^θ - 1)/θ
-    - Risk tolerance (θ): Higher values indicate more willingness to take risk
-    - Levy-Markowitz: Approximates expected utility using mean and variance
+    - CRRA utility: u(x) = ln(x) when θ=1, else (x^θ - 1)/θ (Equation 8.2, Page 153)
+    - Risk tolerance (θ): Parameter between 0 and 1, typically. Higher values indicate more willingness to take risk
+    - Levy-Markowitz: E[u(1+R)] ≈ u(1+μ) + 0.5 * u''(1+μ) * σ² (Equation 8.1, Page 153)
 
 References:
-    - von Neumann, J. & Morgenstern, O. (1944). Theory of Games and Economic Behavior.
-    - Arrow, K.J. (1965). Aspects of the Theory of Risk-Bearing.
-    - Levy, H. & Markowitz, H.M. (1979). Approximating Expected Utility.
+    - Chapter 8: "Approximating Expected Utility in a Mean-Variance Model" (Pages 153-171)
+    - Equation 8.1: Levy-Markowitz utility function (Page 153)
+    - Equation 8.2: CRRA utility function (Page 153)
+    - Equation 8.3: Second derivative of CRRA utility (Page 153)
+    - Levy, H. & Markowitz, H.M. (1979). Approximating Expected Utility by a Function of Mean and Variance
 """
 
 from __future__ import annotations

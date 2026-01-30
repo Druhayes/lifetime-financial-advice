@@ -3,6 +3,12 @@ Tests for lifecycle_planning.core.mortality module.
 
 Tests Gompertz survival probability calculations, life expectancy,
 and mortality-related functions.
+
+Verifies implementation against:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    Appendix 3A, Pages 77-78
+    Exhibit 3A.1: Gompertz parameters (M=88/91, B=10.65/8.88)
 """
 
 import pytest
@@ -22,7 +28,11 @@ from lifecycle_planning.core.mortality import (
 
 
 class TestGompertzSurvivalProb:
-    """Test the basic Gompertz survival probability function."""
+    """Test the basic Gompertz survival probability function.
+
+    Verifies implementation of Gompertz formula from Appendix 3A, Pages 77-78.
+    Formula: g(a2, a1; m, b) = exp(-exp((a1-m)/b) * (exp((a2-a1)/b) - 1))
+    """
 
     def test_survival_at_mode_age(self):
         """Survival probability at mode age should be around 36.8% (1/e)."""
@@ -51,7 +61,11 @@ class TestGompertzSurvivalProb:
 
 
 class TestTruncatedGompertz:
-    """Test the truncated Gompertz function."""
+    """Test the truncated Gompertz function.
+
+    Verifies truncation approach from Appendix 3A, Page 77.
+    Ensures death is certain by max_age as described in source.
+    """
 
     def test_probability_at_same_age(self):
         """Probability of surviving to current age should be 1.0."""
@@ -77,7 +91,12 @@ class TestTruncatedGompertz:
 
 
 class TestSurvivalProbability:
-    """Test the survival_probability function with gender lookup."""
+    """Test the survival_probability function with gender lookup.
+
+    Verifies gender-specific parameters from Exhibit 3A.1, Page 77:
+    - Men: M=88, B=10.65
+    - Women: M=91, B=8.88
+    """
 
     def test_female_survival_to_retirement(self):
         """Test female survival to retirement age."""

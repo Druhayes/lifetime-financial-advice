@@ -2,19 +2,31 @@
 Mortality and Survival Probability Functions
 
 Implements the Gompertz model for survival probability calculations.
-Based on Appendix 3A of "Lifetime Financial Advice".
+
+Implements methodology from:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    CFA Institute Research Foundation
+    With a Foreword by Roger G. Ibbotson
+
+    Source: lifetime-financial-advice.pdf (MCP Knowledge Database)
+    Primary reference: Appendix 3A, Pages 77-78
 
 The Gompertz formula provides a parametric model for survival probability
 with three parameters:
     - a1: current age
     - a2: target age (age to survive to)
-    - m: mode of the distribution of age at death
-    - b: dispersion of age at death around the mode
+    - m: mode of the distribution of age at death (M = 88 for men, 91 for women)
+    - b: dispersion of age at death around the mode (B = 10.65 for men, 8.88 for women)
+
+Gompertz Parameters (from Exhibit 3A.1, Page 77):
+    - Men: M = 88.0, B = 10.65
+    - Women: M = 91.0, B = 8.88
 
 References:
-    - Gompertz, B. (1825). On the nature of the function expressive of human mortality.
-    - Milevsky, M.A. (2012). The 7 Most Important Equations for Your Retirement.
-    - Blanchett, D. and Kaplan, P. (2013). Estimating the True Cost of Retirement.
+    - Appendix 3A: "Measuring the Probability of Survival with the Gompertz Formula" (Pages 77-78)
+    - Exhibit 3A.1: Estimated Parameters for the Gompertz Function Based on US Mortality Rates (Page 77)
+    - Blanchett, D. and Kaplan, P. (2013). Estimating the True Cost of Retirement (parameter estimation)
 """
 
 from __future__ import annotations

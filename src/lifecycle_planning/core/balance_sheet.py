@@ -7,14 +7,27 @@ Implements the individual economic balance sheet concept:
     - Liabilities (present value of nondiscretionary consumption)
     - Net worth (available for discretionary consumption)
 
-Based on Chapters 2 and 12 of "Lifetime Financial Advice".
+Implements methodology from:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    CFA Institute Research Foundation
+    With a Foreword by Roger G. Ibbotson
+
+    Source: lifetime-financial-advice.pdf (MCP Knowledge Database)
+    Primary reference: Chapter 4 (Pages 80-81), Chapter 12 (Pages 224-237)
 
 The balance sheet provides a holistic view of an individual's
 financial situation, including both financial and human capital.
 
+Balance Sheet Framework (Page 81):
+    Assets = Financial Wealth + Human Capital
+    Liabilities = Nondiscretionary Consumption (PV)
+    Net Worth = Assets - Liabilities
+
 References:
-    - Ibbotson, R., Milevsky, M., Chen, P., & Zhu, K.
-      "Lifetime Financial Advice: Human Capital, Asset Allocation, and Insurance"
+    - Chapter 4: Individual balance sheet framework (Pages 80-81)
+    - Chapter 12: Isabela example with complete balance sheet (Pages 224-237)
+    - Page 224: Isabela's human capital ($2,767,689), financial assets
 """
 
 import numpy as np
@@ -402,20 +415,24 @@ class IndividualBalanceSheet:
 
 def create_isabela() -> IndividualBalanceSheet:
     """
-    Create the Isabela example from the document.
+    Create the Isabela example from Chapter 12.
 
     Isabela is the example investor used throughout
-    "Lifetime Financial Advice":
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    by Idzorek & Kaplan (2024), Chapter 12 (Pages 224-237).
+
+    Profile from Exhibit 12.1 & 12.2 (Pages 224-225):
         - 25-year-old woman
         - Post-college education
         - $75,000 current income
         - $40,000 nondiscretionary spending
-        - $100,000 in tax-advantaged savings
-        - Long-lived family (life expectancy ~94)
+        - $270,500 financial wealth ($250,000 taxable, $20,500 tax-advantaged)
+        - Human capital: $2,767,689 (expected)
+        - Long-lived family (life expectancy 94 years, personalized from default 86.4)
         - Moderate risk tolerance (theta=35%)
 
     Returns:
-        IndividualBalanceSheet for Isabela
+        IndividualBalanceSheet for Isabela matching Exhibit 12.2
     """
     prefs = FinancialPreferences(
         theta=0.35,   # Risk tolerance: Low
@@ -433,15 +450,15 @@ def create_isabela() -> IndividualBalanceSheet:
         education="post_college",
         current_income=75000,
         nondiscretionary_spending=40000,
-        taxable_wealth=0,
-        tax_advantaged_wealth=100000,
+        taxable_wealth=250000,      # From Exhibit 12.2, Page 225
+        tax_advantaged_wealth=20500,  # From Exhibit 12.2, Page 225
         social_security_monthly=2000,
         risk_free_rate=0.025,
         equity_return=0.07,
         hc_equity_weight=0.20,
         liability_equity_weight=0.15,
         preferences=prefs,
-        life_expectancy_override=94,  # High longevity family
+        life_expectancy_override=94,  # Personalized from default 86.4 (Page 224)
     )
 
     return isabela

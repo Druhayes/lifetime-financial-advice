@@ -7,11 +7,20 @@ Implements present value calculations for:
     - Liabilities (present value of nondiscretionary consumption)
     - Net worth calculations
 
-Based on Chapters 2, 4, and 5 of "Lifetime Financial Advice".
+Implements methodology from:
+    Idzorek, T.M., & Kaplan, P.D. (2024)
+    "Lifetime Financial Advice: A Personalized Optimal Multilevel Approach"
+    CFA Institute Research Foundation
+    With a Foreword by Roger G. Ibbotson
+
+    Source: lifetime-financial-advice.pdf (MCP Knowledge Database)
+    Primary reference: Chapter 4, Pages 86, 89-90
 
 References:
-    - Ibbotson, R., Milevsky, M., Chen, P., & Zhu, K.
-      "Lifetime Financial Advice: Human Capital, Asset Allocation, and Insurance"
+    - Chapter 4: Human capital valuation methodology (Pages 80-90)
+    - Equations 4.6-4.8: Human capital present value formulas (Pages 89-90)
+    - Page 86: Discount rate selection for human capital (risky HC approach)
+    - Page 85-86: Mortality weighting in present value calculations
 """
 
 from __future__ import annotations
@@ -22,7 +31,7 @@ import numpy as np
 import numpy.typing as npt
 
 
-def present_value(
+def pv(
     cash_flows: Sequence[float] | npt.NDArray[np.float64],
     discount_rate: float,
     start_year: int = 0,
@@ -42,13 +51,17 @@ def present_value(
 
     Example:
         >>> cash_flows = [1000, 1000, 1000, 1000, 1000]  # 5 payments
-        >>> present_value(cash_flows, 0.05)
+        >>> pv(cash_flows, 0.05)
         4329.48  # PV of 5-year annuity
     """
     cash_flows = np.asarray(cash_flows)
     years = np.arange(start_year, start_year + len(cash_flows))
     discount_factors = (1 + discount_rate) ** (-years)
     return float(np.sum(cash_flows * discount_factors))
+
+
+# Deprecated alias for backward compatibility
+present_value = pv
 
 
 def present_value_growing(
@@ -102,6 +115,51 @@ def present_value_perpetuity(
     return payment / (discount_rate - growth_rate)
 
 
+def align_income_survival(
+    income_stream: npt.NDArray[np.float64],
+    survival_probs: npt.NDArray[np.float64],
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """
+    Align income and survival probability arrays to same length.
+
+    Handles the common case where survival_probs includes year 0 (prob=1.0)
+    but income_stream does not.
+
+    Args:
+        income_stream: Income by year
+        survival_probs: Survival probabilities (may include year 0)
+
+    Returns:
+        Tuple of (income, survival_probs) with matching lengths
+
+    Raises:
+        ValueError: If arrays differ by more than 1 element
+
+    Example:
+        >>> income = np.array([75000] * 40)  # 40 years
+        >>> survival = np.array([1.0] + [0.99] * 40)  # 41 years (includes year 0)
+        >>> aligned_income, aligned_survival = align_income_survival(income, survival)
+        >>> len(aligned_income), len(aligned_survival)
+        (40, 40)
+    """
+    len_income = len(income_stream)
+    len_survival = len(survival_probs)
+
+    if len_income == len_survival:
+        return income_stream, survival_probs
+    elif len_survival == len_income + 1:
+        # Survival includes year 0, remove it
+        return income_stream, survival_probs[1:]
+    elif len_income == len_survival + 1:
+        # Income includes extra year, remove last
+        return income_stream[:-1], survival_probs
+    else:
+        raise ValueError(
+            f"Cannot align arrays: income has {len_income} elements, "
+            f"survival has {len_survival} elements (diff > 1)"
+        )
+
+
 def human_capital(
     income_stream: npt.NDArray[np.float64],
     discount_rate: float,
@@ -129,13 +187,14 @@ def human_capital(
         >>> human_capital(income, 0.025)
         1875234...
     """
-    return present_value(income_stream, discount_rate)
+    return pv(income_stream, discount_rate)
 
 
 def human_capital_mortality_weighted(
     income_stream: npt.NDArray[np.float64],
     discount_rate: float,
     survival_probs: npt.NDArray[np.float64],
+    auto_align: bool = True,
 ) -> float:
     """
     Calculate mortality-weighted human capital.
@@ -151,16 +210,26 @@ def human_capital_mortality_weighted(
         income_stream: Array of future income by year
         discount_rate: Discount rate for income
         survival_probs: Survival probabilities by year
+        auto_align: If True, automatically align array lengths (default True)
 
     Returns:
         Mortality-weighted present value of human capital
+
+    Raises:
+        ValueError: If arrays have different lengths and cannot be aligned
     """
+    if auto_align:
+        income_stream, survival_probs = align_income_survival(income_stream, survival_probs)
+
     if len(income_stream) != len(survival_probs):
-        raise ValueError("income_stream and survival_probs must have same length")
+        raise ValueError(
+            f"income_stream and survival_probs must have same length: "
+            f"got {len(income_stream)} and {len(survival_probs)}"
+        )
 
     # Weight income by survival probability
     weighted_income = income_stream * survival_probs
-    return present_value(weighted_income, discount_rate)
+    return pv(weighted_income, discount_rate)
 
 
 def income_discount_rate(
@@ -218,13 +287,14 @@ def liability_value(
         >>> liability_value(consumption, 0.025)
         1392064...
     """
-    return present_value(consumption_stream, discount_rate)
+    return pv(consumption_stream, discount_rate)
 
 
 def liability_value_mortality_weighted(
     consumption_stream: npt.NDArray[np.float64],
     discount_rate: float,
     survival_probs: npt.NDArray[np.float64],
+    auto_align: bool = True,
 ) -> float:
     """
     Calculate mortality-weighted liability value.
@@ -238,15 +308,27 @@ def liability_value_mortality_weighted(
         consumption_stream: Array of nondiscretionary consumption by year
         discount_rate: Discount rate for liabilities
         survival_probs: Survival probabilities by year
+        auto_align: If True, automatically align array lengths (default True)
 
     Returns:
         Mortality-weighted present value of liabilities
+
+    Raises:
+        ValueError: If arrays have different lengths and cannot be aligned
     """
+    if auto_align:
+        consumption_stream, survival_probs = align_income_survival(
+            consumption_stream, survival_probs
+        )
+
     if len(consumption_stream) != len(survival_probs):
-        raise ValueError("consumption_stream and survival_probs must have same length")
+        raise ValueError(
+            f"consumption_stream and survival_probs must have same length: "
+            f"got {len(consumption_stream)} and {len(survival_probs)}"
+        )
 
     weighted_consumption = consumption_stream * survival_probs
-    return present_value(weighted_consumption, discount_rate)
+    return pv(weighted_consumption, discount_rate)
 
 
 def liability_discount_rate(

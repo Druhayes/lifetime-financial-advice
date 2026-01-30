@@ -216,3 +216,7 @@ Thumbs.db
 # Claude Files
 .claude
 .claude/*
+
+# oh-my-claudecode state and temporary files
+.omc/
+.omc/*

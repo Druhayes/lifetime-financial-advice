@@ -7,8 +7,9 @@ Tests present value calculations, human capital, and liability valuations.
 import pytest
 import numpy as np
 from lifecycle_planning.core.present_value import (
-    present_value,
+    pv,
     present_value_growing,
+    align_income_survival,
     human_capital,
     human_capital_mortality_weighted,
     liability_value,
@@ -26,42 +27,42 @@ class TestPresentValue:
     def test_pv_single_payment(self):
         """Test PV of single future payment."""
         # $100 in 1 year at 5% discount rate
-        pv = present_value(100, 0.05, 1)
+        result = pv(100, 0.05, 1)
         expected = 100 / 1.05
-        assert pv == pytest.approx(expected, rel=1e-6)
+        assert result == pytest.approx(expected, rel=1e-6)
 
     def test_pv_multiple_years(self):
         """Test PV of payment multiple years out."""
         # $100 in 10 years at 3% discount rate
-        pv = present_value(100, 0.03, 10)
+        result = pv(100, 0.03, 10)
         expected = 100 / (1.03 ** 10)
-        assert pv == pytest.approx(expected, rel=1e-6)
+        assert result == pytest.approx(expected, rel=1e-6)
 
     def test_pv_decreases_with_time(self):
         """PV should decrease as time to payment increases."""
-        pv_1yr = present_value(100, 0.05, 1)
-        pv_5yr = present_value(100, 0.05, 5)
-        pv_10yr = present_value(100, 0.05, 10)
+        pv_1yr = pv(100, 0.05, 1)
+        pv_5yr = pv(100, 0.05, 5)
+        pv_10yr = pv(100, 0.05, 10)
 
         assert pv_1yr > pv_5yr > pv_10yr
 
     def test_pv_decreases_with_discount_rate(self):
         """PV should decrease as discount rate increases."""
-        pv_2pct = present_value(100, 0.02, 10)
-        pv_5pct = present_value(100, 0.05, 10)
-        pv_8pct = present_value(100, 0.08, 10)
+        pv_2pct = pv(100, 0.02, 10)
+        pv_5pct = pv(100, 0.05, 10)
+        pv_8pct = pv(100, 0.08, 10)
 
         assert pv_2pct > pv_5pct > pv_8pct
 
     def test_pv_zero_discount_rate(self):
         """PV with zero discount rate equals future value."""
-        pv = present_value(100, 0.0, 10)
-        assert pv == pytest.approx(100)
+        result = pv(100, 0.0, 10)
+        assert result == pytest.approx(100)
 
     def test_pv_zero_years(self):
         """PV of immediate payment equals payment amount."""
-        pv = present_value(100, 0.05, 0)
-        assert pv == pytest.approx(100)
+        result = pv(100, 0.05, 0)
+        assert result == pytest.approx(100)
 
 
 class TestPresentValueGrowing:
@@ -101,7 +102,7 @@ class TestPresentValueGrowing:
         pv = present_value_growing(50000, 0.05, 0.02, 1)
         # First payment is immediate (no growth yet)
         expected = 50000 / 1.05
-        assert pv == pytest.approx(expected, rel=1e-3)
+        assert result == pytest.approx(expected, rel=1e-3)
 
 
 class TestHumanCapital:
@@ -355,3 +356,101 @@ class TestDiscountRates:
         dr_liability = liability_discount_rate(0.025, 0.07, 0.10)
 
         assert dr_liability < dr_income
+
+
+class TestAlignIncomeSurvival:
+    """Test array alignment helper function."""
+
+    def test_align_equal_length_arrays(self):
+        """Arrays of equal length should pass through unchanged."""
+        income = np.array([75000.0] * 40)
+        survival = np.array([0.99] * 40)
+
+        aligned_income, aligned_survival = align_income_survival(income, survival)
+
+        assert len(aligned_income) == 40
+        assert len(aligned_survival) == 40
+        np.testing.assert_array_equal(aligned_income, income)
+        np.testing.assert_array_equal(aligned_survival, survival)
+
+    def test_align_survival_includes_year_zero(self):
+        """Survival array with year 0 (length n+1) should be trimmed."""
+        income = np.array([75000.0] * 40)
+        survival = np.array([1.0] + [0.99] * 40)  # 41 elements
+
+        aligned_income, aligned_survival = align_income_survival(income, survival)
+
+        assert len(aligned_income) == 40
+        assert len(aligned_survival) == 40
+        np.testing.assert_array_equal(aligned_income, income)
+        np.testing.assert_array_equal(aligned_survival, survival[1:])
+
+    def test_align_income_has_extra_year(self):
+        """Income array with extra year should be trimmed."""
+        income = np.array([75000.0] * 41)
+        survival = np.array([0.99] * 40)
+
+        aligned_income, aligned_survival = align_income_survival(income, survival)
+
+        assert len(aligned_income) == 40
+        assert len(aligned_survival) == 40
+        np.testing.assert_array_equal(aligned_income, income[:-1])
+        np.testing.assert_array_equal(aligned_survival, survival)
+
+    def test_align_arrays_differ_by_more_than_one(self):
+        """Arrays differing by more than 1 element should raise ValueError."""
+        income = np.array([75000.0] * 40)
+        survival = np.array([0.99] * 45)  # Differs by 5
+
+        with pytest.raises(ValueError, match="Cannot align arrays"):
+            align_income_survival(income, survival)
+
+    def test_align_preserves_values(self):
+        """Alignment should preserve actual data values."""
+        income = np.array([70000.0, 72000.0, 74000.0])
+        survival = np.array([1.0, 0.99, 0.98, 0.97])  # Includes year 0
+
+        aligned_income, aligned_survival = align_income_survival(income, survival)
+
+        # Should drop the year 0 survival prob (1.0)
+        np.testing.assert_array_equal(aligned_survival, [0.99, 0.98, 0.97])
+        np.testing.assert_array_equal(aligned_income, income)
+
+
+class TestAutoAlignment:
+    """Test auto-alignment in mortality-weighted functions."""
+
+    def test_human_capital_auto_aligns(self):
+        """human_capital_mortality_weighted should auto-align arrays."""
+        # Simulate common mismatch: income has 40 elements, survival has 41
+        income = np.array([75000.0] * 40)
+        survival = np.array([1.0] + [0.99] * 40)
+
+        # Should not raise ValueError with auto_align=True (default)
+        hc = human_capital_mortality_weighted(income, 0.035, survival)
+        assert hc > 0
+
+    def test_human_capital_auto_align_disabled(self):
+        """With auto_align=False, mismatched arrays should raise ValueError."""
+        income = np.array([75000.0] * 40)
+        survival = np.array([1.0] + [0.99] * 40)
+
+        with pytest.raises(ValueError, match="must have same length"):
+            human_capital_mortality_weighted(income, 0.035, survival, auto_align=False)
+
+    def test_liability_auto_aligns(self):
+        """liability_value_mortality_weighted should auto-align arrays."""
+        consumption = np.array([40000.0] * 30)
+        survival = np.array([1.0] + [0.99] * 30)
+
+        # Should not raise ValueError with auto_align=True (default)
+        lv = liability_value_mortality_weighted(consumption, 0.025, survival)
+        assert lv > 0
+
+    def test_liability_auto_align_disabled(self):
+        """With auto_align=False, mismatched arrays should raise ValueError."""
+        consumption = np.array([40000.0] * 30)
+        survival = np.array([1.0] + [0.99] * 30)
+
+        with pytest.raises(ValueError, match="must have same length"):
+            liability_value_mortality_weighted(consumption, 0.025, survival, auto_align=False)
